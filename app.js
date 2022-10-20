@@ -65,7 +65,9 @@ function handleSymbol(symbol){
             runningTotal = 0;
             break;
         case '←':
-            if (buffer.length === 1) {
+            if (buffer === 'Error') {
+                buffer = '0';
+            } else if (buffer.length === 1) {
                 buffer = '0';
             } else {
                 buffer = buffer.substring(0, buffer.length -1);
@@ -90,7 +92,8 @@ function init() {
 
 function rerender() {
     if (buffer === 'Infinity' || buffer === 'NaN') {
-        screen.innerText = 'Error'
+        buffer = 'Error'
+        screen.innerText = buffer;
     }   else {
         screen.innerText = buffer;
     }
