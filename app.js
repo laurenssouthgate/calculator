@@ -1,122 +1,97 @@
-const calculator = document.querySelector('.buttons')
-const output = document.querySelector('.output')
-let buttonPressed;
-let number = '0';
-let operator;
-let firstNumber = '';
-let secondNumber = '';
-let answer;
+let buffer = '0';
+let runningTotal = 0;
+let previousOperator = null;
+const screen = document.querySelector('.output');
 
-
-calculator.addEventListener("click", calculate)
-
-function calculate(e) {
-    buttonPressed = e.target.innerText;
-    if (buttonPressed === 'C'){
-        clearOutput();
+function buttonClick(value) {
+    if (isNaN(parseInt(value))) {
+        handleSymbol(value);
+    } else {
+        handleNumber(value);
     }
-    else if (
-            buttonPressed === '1' ||
-            buttonPressed === '2' ||
-            buttonPressed === '3' ||
-            buttonPressed === '4' ||
-            buttonPressed === '5' ||
-            buttonPressed === '6' ||
-            buttonPressed === '7' ||
-            buttonPressed === '8' ||
-            buttonPressed === '9' ||
-            buttonPressed === '0'
-            ) {
-                handleNumbers();
+    rerender();
+}
+
+function handleNumber(number){
+    if (buffer === '0') {
+        buffer = number;
+    } else {
+        buffer += number;
+    }
+}
+
+function handleMath(value) {
+    if (buffer === '0') {
+        // do nothing
+        return;
+    }
+
+    const intBuffer = parseInt(buffer);
+    if (runningTotal === 0) {
+        runningTotal = intBuffer;
+    } else {
+        flushOperation(intBuffer);
+    }
+
+    previousOperator = value;
+    buffer = '0'
+}
+
+function flushOperation (intBuffer) {
+    if (previousOperator === '+') {
+        runningTotal += intBuffer
+    } else if (previousOperator === '-') {
+        runningTotal -= intBuffer
+    } else if (previousOperator === 'x') {
+        runningTotal *= intBuffer
+    } else if (previousOperator === '÷') {
+        runningTotal /= intBuffer
+    } 
+
+}
+
+function handleSymbol(symbol){
+    switch (symbol) {
+        case 'C':
+            buffer = '0';
+            break;
+        case '=':
+            if (previousOperator === null) {
+                return
             }
-    else if (
-            buttonPressed === '+' ||
-            buttonPressed === '-' ||
-            buttonPressed === 'x' ||
-            buttonPressed === '÷'
-            ) {
-                storeFirstNumber();
+            flushOperation(parseInt(buffer));
+            previousOperator = null;
+            buffer = "" + runningTotal;
+            runningTotal = 0;
+            break;
+        case '←':
+            if (buffer.length === 1) {
+                buffer = '0';
+            } else {
+                buffer = buffer.substring(0, buffer.length -1);
             }
-    else if (buttonPressed === '←'){
-        handleBackSpace()
-    }
-    else if (buttonPressed === '='){
-        handleSum()
-    }
-    return buttonPressed;
-}
-
-function clearOutput() {
-    number = '0';
-    firstNumber = ''
-    secondNumber = ''
-    output.innerHTML = number;
-}
-
-function handleNumbers() {
-    if (firstNumber === '') {
-        if (number === '0' || ''){
-            number = buttonPressed;
-        }
-        else {
-            number = number + buttonPressed;
-        }
-        output.innerHTML = number;
-    }
-    else if (firstNumber !== '') {
-        if (secondNumber === '0' || ''){
-            secondNumber = buttonPressed;
-        }
-        else {
-            secondNumber = secondNumber + buttonPressed;
-        }
-        output.innerHTML = secondNumber;
+            break;
+        case '+':
+        case '-':
+        case '÷':
+        case 'x':
+            handleMath(symbol);
+            break;
     }
 }
 
-function storeFirstNumber() {
-    operator = buttonPressed;
-    firstNumber = number;
-    number = '0'
+function init() {
+    document
+    .querySelector('.buttons')
+    .addEventListener("click", function(event) {
+        buttonClick(event.target.innerText);
+    })
 }
 
-function handleBackSpace(){
-    if (firstNumber === '') {
-        if(number !== '0' || number !== '')
-            number = number.slice(0, -1)
-        else if (number === '0' || number === ''){
-            number = '0';
-        }
-        output.innerHTML = number;
-    }
-    else if (firstNumber !== '') {
-        if (secondNumber !== '0' || secondNumber !== '')
-            secondNumber = secondNumber.slice(0, -1)
-        else if (secondNumber === '0' || secondNumber === ''){
-            secondNumber = '0';
-        }
-        output.innerHTML = secondNumber;
-    }
+function rerender() {
+    screen.innerText = buffer;
 }
 
-function handleSum() {
-    if (operator === '+'){
-        answer = parseInt(firstNumber) + parseInt(secondNumber)
-    }
-    else if (operator === '-'){
-        answer = parseInt(firstNumber) - parseInt(secondNumber)
-    }
-    else if (operator === 'x'){
-        answer = parseInt(firstNumber) * parseInt(secondNumber)
-    }
-    else if (operator === '÷'){
-        answer = parseInt(firstNumber) / parseInt(secondNumber)
-    }
-    output.innerHTML = answer;
-    number = answer;
-    firstNumber = ''
-    secondNumber = ''
-}
-
+init();
 
 
