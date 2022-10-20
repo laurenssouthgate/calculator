@@ -89,7 +89,11 @@ function init() {
 }
 
 function rerender() {
-    screen.innerText = buffer;
+    if (buffer === 'Infinity' || buffer === 'NaN') {
+        screen.innerText = 'Error'
+    }   else {
+        screen.innerText = buffer;
+    }
 }
 
 init();
